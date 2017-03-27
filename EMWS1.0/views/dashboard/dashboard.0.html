@@ -1,0 +1,1016 @@
+<!-- <script type="text/javascript" src="scripts/gchartsapi.js"></script> -->
+<!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script> -->
+<script>
+// scripts for the page
+$(".btn").mouseup(function() {
+    $(this).blur();
+});
+
+// (function(app) {
+
+//     app.loadGoogleMapsScript = function() {
+//         var script = document.createElement('script');
+//         script.type = 'text/javascript';
+//         script.src = 'https://www.gstatic.com/charts/loader.js';
+//         document.body.appendChild(script);
+
+
+//     };
+
+// }(window.app = window.app || {}));
+
+// window.onload = app.loadGoogleMapsScript;
+
+// google.charts.load('current', {'packages':['corechart']});
+
+// google.charts.load('current', {'packages':['corechart']});
+
+// readFunc();
+function runExperiment() {
+    getIncomingMode();
+    printTransmissionChart("transView", "100%", "100%");
+    printFieldsChart("addHere", "structView", "100%", "100%");
+    printFieldsChart("addHere2", "fieldsModal", "100%", "100%");
+    printStructureChart("addHere3", "structureView", "100%", "100%");
+    // printFieldsChart("fieldsModal", "100%", "100%");
+    printDispersionChart("dispView", "100%", "100%");
+    numOfLayers = parseInt(document.getElementById("numLayers").value);
+    layers = numOfLayers + 2;
+    epsilon = [];
+    mu = [];
+    length = [];
+    var endRange = 0;
+    for (var i = 0; i < layers; i++) {
+        epsilon[i] = parseInt(document.getElementById("e" + i).value);
+        mu[i] = parseInt(document.getElementById("m" + i).value);
+        length[i] = parseInt(document.getElementById("l" + i).value);
+        endRange += length[i]; 
+    }
+    var o = parseFloat(document.getElementById("omega").value);
+    var k1 = parseFloat(document.getElementById("k1").value);
+    var k2 = parseFloat(document.getElementById("k2").value);
+    var j1 = parseFloat(document.getElementById("j1").value);
+    var j2 = parseFloat(document.getElementById("j2").value);
+    var j3 = parseFloat(document.getElementById("j3").value);
+    var j4 = parseFloat(document.getElementById("j4").value);
+
+
+    crystal1 = new emScattering.PhotonicStructure1D(epsilon, mu, length);
+
+    fields = crystal1.determineField(o, k1, k2, [j1, j2, j3, j4]);
+    var interfaces = crystal1.materialInterfaces();
+
+
+    addAnim("testcanvas", endRange);
+
+}
+function refreshStructure() {
+    printStructureChart("addHere3", "structureView", "100%", "100%");
+    // console.log("refreshStructure ran");
+    // printTransmissionChart("transView", 600, 900);
+    // printFieldsChart("addHere", "structView", "100%", "100%");
+    // printDispersionChart("dispView", 600, 900);
+}
+
+function refreshNumLayers() {
+    divToAdd = document.getElementById("structForm");
+    numberOfLayers = parseInt(document.getElementById("numLayers").value);
+    if (numberOfLayers <= 0) {
+        console.log("no layers, just ambients");
+        var noHtmlString = "<div class='form-group row'><label for='inputPassword3' class='col-sm-2 form-control-label'>Ambient Right</label><div class='col-sm-10'><div class='row row-sm'><div class='col-xs-3'><input type='text' class='form-control' placeholder='epsilon' id='e" + (numberOfLayers + 1) + "' value='1'></div><div class='col-xs-3'><input type='text' class='form-control' placeholder='mu' id='m" + (numberOfLayers + 1) + "' value='1'></div><div class='col-xs-3'><input type='text' class='form-control' placeholder='length' id='l" + (numberOfLayers + 1) + "' value='6'></div></div></div></div>";
+        $("#layerDiv").html(noHtmlString);
+    } else {
+        var htmlString = "";
+        for (var i = 0; i < numberOfLayers; i++) {
+            htmlString += "<div class='form-group row'><label for='inputPassword3' class='col-sm-2 form-control-label'>Layer " + (i + 1) + "</label><div class='col-sm-10'><div class='row row-sm'><div class='col-xs-3'><input type='text' class='form-control' placeholder='epsilon' id='e" + (i + 1) + "' value='5'></div><div class='col-xs-3'><input type='text' class='form-control' placeholder='mu' id='m" + (i + 1) + "' value='1'></div><div class='col-xs-3'><input type='text' class='form-control' placeholder='length' id='l" + (i + 1) + "' value='3'></div></div></div></div>";
+        }
+        htmlString += "<div class='form-group row'><label for='inputPassword3' class='col-sm-2 form-control-label'>Ambient Right</label><div class='col-sm-10'><div class='row row-sm'><div class='col-xs-3'><input type='text' class='form-control' placeholder='epsilon' id='e" + (numberOfLayers + 1) + "' value='1'></div><div class='col-xs-3'><input type='text' class='form-control' placeholder='mu' id='m" + (numberOfLayers + 1) + "' value='1'></div><div class='col-xs-3'><input type='text' class='form-control' placeholder='length' id='l" + (numberOfLayers + 1) + "' value='6'></div></div></div></div>";
+        $("#layerDiv").html(htmlString);
+    }
+}
+
+$(function() {
+
+    refreshNumLayers();
+    fillSampleValues(2);
+    getIncomingMode();
+    google.charts.load('current', {
+        'packages': ['corechart']
+    });
+    google.charts.setOnLoadCallback(function() {
+        printTransmissionChart("transView", "100%", "100%");
+        printFieldsChart("addHere", "structView", "100%", "100%");
+        printStructureChart("addHere3", "structureView", "100%", "100%");
+        // printFieldsChart("fieldsModal", "100%", "100%");
+        printDispersionChart("dispView", "100%", "100%")
+    });
+    // console.log(document.getElementById("e4").value)s;
+
+    // printFieldsChart("structView", 3, 150, 150);
+});
+$(window).resize(function() {
+    printTransmissionChart("transView", "100%", "100%");
+    printFieldsChart("addHere", "structView", "100%", "100%");
+    printFieldsChart("addHere2", "fieldsModal", "100%", "100%");
+    printStructureChart("addHere3", "structureView", "100%", "100%");
+    // printFieldsChart("fieldsModal", "100%", "100%");
+    printDispersionChart("dispView", "100%", "100%");
+});
+</script>
+<style>
+canvas {
+      position: relative;
+      /*top: 0vw;*/
+      /*left: 0vw;*/
+      z-index: 1;
+      /*border-style: solid;*/
+    border-width: 5px;
+    }
+
+    #playcanvas {
+      /*position: absolute;*/
+      /*top: 0vw;*/
+      /*left: 0vw;*/
+      /*height:240px;*/
+      /*width:370px;*/
+      /*border-style: solid;*/
+    /*border-width: 5px;*/
+    }
+#testcanvas {
+      /*position: absolute;*/
+      /*top: 0vw;*/
+      /*left: 0vw;*/
+      height:20vw;
+      /*width:370px;*/
+      /*border-style: solid;*/
+    /*border-width: 5px;*/
+    }
+    #playercanvas {
+      /*position: absolute;*/
+      /*top: 0vw;*/
+      /*left: 0vw;*/
+      height:20vw;
+      /*width:370px;*/
+      /*border-style: solid;*/
+    /*border-width: 5px;*/
+    }
+
+
+#dispView {
+    min-height: 400px !important;
+}
+
+#transView {
+    min-height: 400px !important;
+}
+
+#structView {
+    min-height: 400px !important;
+    /*width:120% !important; */
+}
+
+#fieldsModal {
+    min-height: 700px !important;
+    /*width:120% !important; */
+}
+
+#shownVal {
+    display: none;
+}
+</style>
+
+
+
+
+
+<script>
+numOfLayers = parseInt(document.getElementById("numLayers").value);
+    layers = numOfLayers + 2;
+    epsilon = [];
+    mu = [];
+    length = [];
+    for (var i = 0; i < layers; i++) {
+        epsilon[i] = parseInt(document.getElementById("e" + i).value);
+        mu[i] = parseInt(document.getElementById("m" + i).value);
+        length[i] = parseInt(document.getElementById("l" + i).value);
+    }
+    var o = parseFloat(document.getElementById("omega").value);
+    var k1 = parseFloat(document.getElementById("k1").value);
+    var k2 = parseFloat(document.getElementById("k2").value);
+    var j1 = parseFloat(document.getElementById("j1").value);
+    var j2 = parseFloat(document.getElementById("j2").value);
+    var j3 = parseFloat(document.getElementById("j3").value);
+    var j4 = parseFloat(document.getElementById("j4").value);
+
+
+    crystal1 = new emScattering.PhotonicStructure1D(epsilon, mu, length);
+
+    fields = crystal1.determineField(o, k1, k2, [j1, j2, j3, j4]);
+    var interfaces = crystal1.materialInterfaces();
+    // var totalLength = 0;
+    // for(i=0;1<length.length;i++){
+    //     totalLength = totalLength + length[i];
+    // }
+    // var ourFunc = crystal1.MathboxStuff(o, k1, k2, [j1, j2, j3, j4]);
+   // var ourFunc;
+  function addAnim(canvasElement, endRange) {
+    var o = parseFloat(document.getElementById("omega").value);
+    var k1 = parseFloat(document.getElementById("k1").value);
+    var k2 = parseFloat(document.getElementById("k2").value);
+    var j1 = parseFloat(document.getElementById("j1").value);
+    var j2 = parseFloat(document.getElementById("j2").value);
+    var j3 = parseFloat(document.getElementById("j3").value);
+    var j4 = parseFloat(document.getElementById("j4").value);
+
+    var elem = document.getElementById(canvasElement);
+    var jelem = $("#"+canvasElement);
+    console.log("canvas element jquer:"+jelem.parent().css("background-color"));
+    var rgbColor = jelem.parent().css("background-color");
+    var WIDTH = elem.offsetWidth-10;
+    var HEIGHT = elem.offsetHeight-5;
+    // Vanilla Three.js
+    // THREE.Bootstrap();
+    var w1 = WIDTH;
+    var h1 = HEIGHT;
+    var three = THREE.Bootstrap({ plugins: ['core', 'controls'],
+      controls: {
+        klass: THREE.OrbitControls
+      }, size: {
+        width:w1,
+        height:h1,
+        // left: "400",
+      },});
+    var renderer = three.renderer;
+    var scene = three.scene;
+    var camera = three.camera;
+
+
+    // Insert into document
+    elem.appendChild(renderer.domElement);
+
+    // MathBox context
+    var context = new MathBox.Context(renderer, scene, camera).init();
+    var mathbox = context.api;
+    // mathbox2 = mathBox({
+    //   plugins: ['core', 'controls', 'cursor'],
+    //   controls: {
+    //     klass: THREE.OrbitControls
+    //   },    });
+    // mathbox.install('controls');
+    // Set size
+    renderer.setSize(WIDTH, HEIGHT);
+    context.resize({ viewWidth: WIDTH, viewHeight: HEIGHT });
+
+    // Place camera and set background
+    camera.position.set(0, 0, 3);
+    renderer.setClearColor(new THREE.Color(rgbColor), 1.0);
+    
+
+    view = mathbox
+    .set({
+      focus: 3,
+    })
+    .cartesian({
+      range: [[0, endRange], [-2, 2], [-2, 2]],
+      scale: [2, 1, 1],
+    });
+
+    view.axis({
+      detail: 30,
+    });
+
+    view.axis({
+      axis: 2,
+    });
+    
+    view.scale({
+      divide: 10,
+    })
+    view.ticks({
+      classes: ['foo', 'bar'],
+      width: 2
+    });
+
+    // view.grid({
+    //   divideX: 30,
+    //   width: 1,
+    //   opacity: 0.5,
+    //   zBias: -5,
+    // });
+    view.scale({//adds "X-Axis" to the graph
+      divide: 1,
+      origin: [0,-2,0,0],
+      axis: "x",
+    }).text({
+      live: false,
+      data: ["Electric Field"]
+    }).label({
+      color: 0x0074D9,
+      offset: [75, 20]
+    })
+
+    view.scale({//adds "Y-Axis" to the graph
+      divide: 1,
+      origin: [0,0,2,0],
+      axis: "y",
+    }).text({
+      live: false,
+      data: ["Magnetic Field"]
+    }).label({
+      color: 0xFF4136,
+      offset: [80, 20]
+    })
+
+    view.grid({
+      axes: "xy",
+      divideX: 10,   
+      divideY: 10
+    })              //makes two axes in space
+    .grid({
+      axes: "xz",
+      divideX: 10,  
+      divideY: 10,
+    })
+
+    var ourFunc;
+    var runsetup = true;
+    var EigVals = new Array();
+    var EigVecs = new Array();
+    var ExrArray = new Array();
+    var ExthetaArray = new Array();
+    var EyrArray = new Array();
+    var EythetaArray = new Array();
+
+    // var HxrArray = new Array();
+    // var HxthetaArray = new Array();
+    // var HyrArray = new Array();
+    // var HythetaArray = new Array();
+
+    view.interval({
+      id: 'ElectricFieldPlot',
+      width: endRange*10,//fields.Ex.length,
+      expr: function (emit, z, i, t) {
+        if(runsetup){
+            var U = crystal1.scattering(o, k1, k2, [j1, j2, j3, j4]);
+            //Electric field
+            var cxE = [j1, j2, U.x[0], U.x[1]];
+            var cyE = [0, 0, U.y[0], U.y[1]];
+            var cE = new numeric.T(cxE, cyE);
+            //Magnetic field
+            // var cxH = [j1, j2, U.x[2], U.x[3]];
+            // var cyH = [0, 0, U.y[2], U.y[3]];
+            // var cH = new numeric.T(cxH, cyH);
+
+            for(i=0; i<epsilon.length; i++){
+                EigVals[i] = emScattering.eigenvaluesIsotropic(epsilon[i], mu[i], k1, k2);
+                EigVecs[i] = emScattering.eigenvectorsIsotropic(epsilon[i], mu[i], k1, k2);
+                // console.log("EigVecs[i]: "+EigVecs[i].y[0][0]);//EigVecs[layernum].y[wavetype][vectornum]
+                                                            // .x or .y for real and imaginary parts
+                                                            // wavetype is 0 for ex, 1 for ey, 2 for hx, 3 for hy
+                // Electric field
+                var ExR = new Array();
+                var ExTheta = new Array();
+                var EyR = new Array();
+                var EyTheta = new Array();
+                // Magnetic field
+                // var HxR = new Array();
+                // var HxTheta = new Array();
+                // var HyR = new Array();
+                // var HyTheta = new Array();
+                for(j=0; j<4; j++){
+                  //Electric field
+                    var ExA = cE.x[j]*EigVecs[i].x[0][j];
+                    var EyA = cE.x[j]*EigVecs[i].x[1][j];
+                    var ExB = cE.y[j]*EigVecs[i].y[0][j]; 
+                    var EyB = cE.y[j]*EigVecs[i].y[1][j];
+                    ExR[j] = Math.sqrt(Math.pow(ExA,2)+Math.pow(ExB,2));
+                    EyR[j] = Math.sqrt(Math.pow(EyA,2)+Math.pow(EyB,2));
+                    ExTheta[j] = Math.atan2(ExB,ExA);
+                    EyTheta[j] = Math.atan2(EyB,EyA);
+                    //Magnetic field
+                    // var HxA = cH.x[j]*EigVecs[i].x[2][j];
+                    // var HyA = cH.x[j]*EigVecs[i].x[3][j];
+                    // var HxB = cH.y[j]*EigVecs[i].y[2][j]; 
+                    // var HyB = cH.y[j]*EigVecs[i].y[3][j];
+                    // HxR[j] = Math.sqrt(Math.pow(HxA,2)+Math.pow(HxB,2));
+                    // HyR[j] = Math.sqrt(Math.pow(HyA,2)+Math.pow(HyB,2));
+                    // HxTheta[j] = Math.atan2(HxB,HxA);
+                    // HyTheta[j] = Math.atan2(HyB,HyA);
+                }
+                //electric field
+                ExrArray[i] = ExR;
+                EyrArray[i] = EyR;
+                ExthetaArray[i] = ExTheta;
+                EythetaArray[i] = EyTheta;
+                //magnetic field
+                // HxrArray[i] = HxR;
+                // HyrArray[i] = HyR;
+                // HxthetaArray[i] = HxTheta;
+                // HythetaArray[i] = HyTheta;
+
+                if(i+1  <epsilon.length){
+                    cE = crystal1.crystal.transferMatrices[i].dot(cE);
+                    // cH = crystal1.crystal.transferMatrices[i].dot(cH);
+                    // console.log("c: "+c.x);
+                } 
+            };
+        };
+        // runsetup = false;
+        var layerNumber;
+        var lowerL = 0;
+        var upperL = length[0];
+        for(ii=0; ii<length.length; ii++){
+            if(lowerL<=z && z<=upperL){
+                layerNumber = ii;
+                break
+            }
+            else{
+                lowerL = upperL;
+                upperL = upperL+length[ii+1];
+            }
+        }
+
+        
+        Ex = ExrArray[layerNumber][0]*Math.cos(ExthetaArray[layerNumber][0] + EigVals[layerNumber][0].y*z - o*t) +
+            ExrArray[layerNumber][1]*Math.cos(ExthetaArray[layerNumber][1] + EigVals[layerNumber][1].y*z - o*t) +
+            ExrArray[layerNumber][2]*Math.cos(ExthetaArray[layerNumber][2] + EigVals[layerNumber][2].y*z - o*t) +
+            ExrArray[layerNumber][3]*Math.cos(ExthetaArray[layerNumber][3] + EigVals[layerNumber][3].y*z - o*t);
+
+        Ey = EyrArray[layerNumber][0]*Math.cos(EythetaArray[layerNumber][0] + EigVals[layerNumber][0].y*z - o*t) +
+            EyrArray[layerNumber][1]*Math.cos(EythetaArray[layerNumber][1] + EigVals[layerNumber][1].y*z - o*t) +
+            EyrArray[layerNumber][2]*Math.cos(EythetaArray[layerNumber][2] + EigVals[layerNumber][2].y*z - o*t) +
+            EyrArray[layerNumber][3]*Math.cos(EythetaArray[layerNumber][3] + EigVals[layerNumber][3].y*z - o*t);
+
+        // Hx = ExrArray[layerNumber][0]*Math.cos(HxthetaArray[layerNumber][0] + EigVals[layerNumber][0].y*z - o*t) +
+        //     ExrArray[layerNumber][1]*Math.cos(HxthetaArray[layerNumber][1] + EigVals[layerNumber][1].y*z - o*t) +
+        //     ExrArray[layerNumber][2]*Math.cos(HxthetaArray[layerNumber][2] + EigVals[layerNumber][2].y*z - o*t) +
+        //     ExrArray[layerNumber][3]*Math.cos(HxthetaArray[layerNumber][3] + EigVals[layerNumber][3].y*z - o*t);
+
+        // Hy = EyrArray[layerNumber][0]*Math.cos(HythetaArray[layerNumber][0] + EigVals[layerNumber][0].y*z - o*t) +
+        //     EyrArray[layerNumber][1]*Math.cos(HythetaArray[layerNumber][1] + EigVals[layerNumber][1].y*z - o*t) +
+        //     EyrArray[layerNumber][2]*Math.cos(HythetaArray[layerNumber][2] + EigVals[layerNumber][2].y*z - o*t) +
+        //     EyrArray[layerNumber][3]*Math.cos(HythetaArray[layerNumber][3] + EigVals[layerNumber][3].y*z - o*t);
+        // x = Math.cos(-5*z);
+        // y = Math.cos(2*x);
+
+
+        emit(z, Ex, Ey);
+        emit(z, 0, 0);
+      },
+      items: 2,
+      channels: 3,
+      live: true,
+    });
+
+    // view.line({
+    //   points: '#ElectricFieldPlot',
+    //   color: 0x0074D9,
+    //   width: 2,
+    // });
+    view.vector({
+      points: '#ElectricFieldPlot',
+      color: 0x0074D9,
+      width: 1,
+      start: true,
+    });
+
+    var HxrArray = new Array();
+    var HxthetaArray = new Array();
+    var HyrArray = new Array();
+    var HythetaArray = new Array();
+
+    view.interval({
+      id: 'MagneticFieldPlot',
+      width: endRange*10,//fields.Ex.length,
+      expr: function (emit, z, i, t) {
+        if(runsetup){
+            var U = crystal1.scattering(o, k1, k2, [j1, j2, j3, j4]);
+            //Magnetic field
+            var cxH = [j1, j2, U.x[2], U.x[3]];
+            var cyH = [0, 0, U.y[2], U.y[3]];
+            var cH = new numeric.T(cxH, cyH);
+
+            for(i=0; i<epsilon.length; i++){
+                EigVals[i] = emScattering.eigenvaluesIsotropic(epsilon[i], mu[i], k1, k2);
+                EigVecs[i] = emScattering.eigenvectorsIsotropic(epsilon[i], mu[i], k1, k2);
+                // console.log("EigVecs[i]: "+EigVecs[i].y[0][0]);//EigVecs[layernum].y[wavetype][vectornum]
+                                                            // .x or .y for real and imaginary parts
+                                                            // wavetype is 0 for ex, 1 for ey, 2 for hx, 3 for hy
+                var HxR = new Array();
+                var HxTheta = new Array();
+                var HyR = new Array();
+                var HyTheta = new Array();
+                for(j=0; j<4; j++){
+                    var HxA = cH.x[j]*EigVecs[i].x[2][j];
+                    var HyA = cH.x[j]*EigVecs[i].x[3][j];
+                    var HxB = cH.y[j]*EigVecs[i].y[2][j]; 
+                    var HyB = cH.y[j]*EigVecs[i].y[3][j];
+                    HxR[j] = Math.sqrt(Math.pow(HxA,2)+Math.pow(HxB,2));
+                    HyR[j] = Math.sqrt(Math.pow(HyA,2)+Math.pow(HyB,2));
+                    HxTheta[j] = Math.atan2(HxB,HxA);
+                    HyTheta[j] = Math.atan2(HyB,HyA);
+                }
+                HxrArray[i] = HxR;
+                HyrArray[i] = HyR;
+                HxthetaArray[i] = HxTheta;
+                HythetaArray[i] = HyTheta;
+
+                if(i+1  <epsilon.length){
+                    cH = crystal1.crystal.transferMatrices[i].dot(cH);
+                } 
+            };
+            runsetup = false;
+        };
+        var layerNumber;
+        var lowerL = 0;
+        var upperL = length[0];
+        for(ii=0; ii<length.length; ii++){
+            if(lowerL<=z && z<=upperL){
+                layerNumber = ii;
+                break
+            }
+            else{
+                lowerL = upperL;
+                upperL = upperL+length[ii+1];
+            }
+        }
+
+        Hx = HxrArray[layerNumber][0]*Math.cos(HxthetaArray[layerNumber][0] + EigVals[layerNumber][0].y*z - o*t) +
+            HxrArray[layerNumber][1]*Math.cos(HxthetaArray[layerNumber][1] + EigVals[layerNumber][1].y*z - o*t) +
+            HxrArray[layerNumber][2]*Math.cos(HxthetaArray[layerNumber][2] + EigVals[layerNumber][2].y*z - o*t) +
+            HxrArray[layerNumber][3]*Math.cos(HxthetaArray[layerNumber][3] + EigVals[layerNumber][3].y*z - o*t);
+
+        Hy = HyrArray[layerNumber][0]*Math.cos(HythetaArray[layerNumber][0] + EigVals[layerNumber][0].y*z - o*t) +
+            HyrArray[layerNumber][1]*Math.cos(HythetaArray[layerNumber][1] + EigVals[layerNumber][1].y*z - o*t) +
+            HyrArray[layerNumber][2]*Math.cos(HythetaArray[layerNumber][2] + EigVals[layerNumber][2].y*z - o*t) +
+            HyrArray[layerNumber][3]*Math.cos(HythetaArray[layerNumber][3] + EigVals[layerNumber][3].y*z - o*t);
+        // x = Math.cos(-5*z);
+        // y = Math.cos(2*x);
+
+
+        emit(z, Hx, Hy);
+        emit(z, 0, 0);
+        // emit(z, Hy, Hx);
+      },
+      items: 2,
+      channels: 3,
+      live: true,
+    });
+
+    // view.line({
+    //   points: '#MagneticFieldPlot',
+    //   color: 0xFF4136,
+    //   width: 2,
+    // });
+
+    view.vector({
+      points: '#MagneticFieldPlot',
+      color: 0xFF4136,
+      width: 1,
+      start: true,
+    });
+    
+    frame = function () {
+      requestAnimationFrame(frame);
+      WIDTH = elem.offsetWidth-10;
+      HEIGHT = elem.offsetHeight-5;
+      renderer.setSize(WIDTH, HEIGHT);
+
+    context.resize({ viewWidth: WIDTH, viewHeight: HEIGHT });
+      context.frame();
+      renderer.render(scene, camera);
+      rgbColor = jelem.parent().css("background-color");//0xFF851B;
+      renderer.setClearColor(new THREE.Color(rgbColor), 1.0);
+    };
+
+    requestAnimationFrame(frame);
+    var off = $(elem).offset();
+    off.left += 5;
+    $("canvas").offset(off);
+    // $("canvas").offset()
+}
+
+
+  </script>
+<script type="text/javascript">addAnim("testcanvas", 21);</script>
+
+
+
+
+
+<div class="padding">
+<input id="shownVal" value="Ex">
+<!--     <div class="margin">
+        <h5 class="m-b-0 _300">Hi Dr. Shipmans, Welcome back</h5>
+        <small class="text-muted"></small>
+    </div> -->
+    <div class="row">
+        <div class="col-md-12 col-xl-4">
+            <div class="box">
+                <div class="box-header">
+                    <h3>Define Structure</h3>
+                    <small>Fill in the corresponding epsilon, mu, and length values for each layer.</small>
+                </div>
+                <div class="box-divider m-a-0"></div>
+                <div class="box-body">
+                <label for="inputEmail3" class="col-sm-2 form-control-label">Number of Layers</label>
+<input id="numLayers" type="text" value="3">
+                                <button class="btn btn-icon white" onclick="refreshNumLayers()">
+                                    <i class="fa fa-refresh"></i>
+                                </button>
+                    <form id="structForm" role="form">
+                        <div class="form-group row">
+                            
+                            <div class="col-sm-10">
+                                <!-- <input id="numLayers" type="text" value="3" ng-model="ctrl.val3" ng-touch-spin> -->
+                                <button style="display: none;"  onclick="refreshStructure()">
+                                    
+                                </button>
+                                <script>
+                                function readLayers() {
+                                    console.log("read layers");
+                                    // $().button('toggle');
+                                }
+                                readLayers("ran once");
+                                $("#numLayers").change(function() {
+                                    readLayers("Handler for .change() called.");
+                                });
+                                </script>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword3" class="col-sm-2 form-control-label"></label>
+                            <div class="col-sm-10">
+                                <div class="row row-sm">
+                                    <div class="col-xs-3 center-block">
+                                        <span class="center-block label dark pos-rlt m-r-xs"><b class="center-block arrow bottom b-dark pull-in"></b>EPSILON</span>
+                                    </div>
+                                    <div class="col-xs-3 center-block">
+                                        <span class="center-block label dark pos-rlt m-r-xs"><b class="center-block arrow bottom b-dark pull-in"></b>MU</span>
+                                    </div>
+                                    <div class="col-xs-3 center-block">
+                                        <span class="center-block label dark pos-rlt m-r-xs"><b class="center-block arrow bottom b-dark pull-in"></b>LENGTH</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword3" class="col-sm-2 form-control-label">Ambient Left</label>
+                            <div class="col-sm-10">
+                                <div class="row row-sm">
+                                    <div class="col-xs-3">
+                                        <input type="text" class="form-control" placeholder="epsilon" id="e0" value="1">
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <input type="text" class="form-control" placeholder="mu" id="m0" value="1">
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <input type="text" class="form-control" placeholder="length" id="l0" value="6">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="layerDiv">
+                            <!-- <div class="form-group row">
+                                <label for="inputPassword3" class="col-sm-2 form-control-label">Layer 1</label>
+                                <div class="col-sm-10">
+                                    <div class="row row-sm">
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="epsilon" value="5">
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="mu" value="10">
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="length" value="3">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="inputPassword3" class="col-sm-2 form-control-label">Layer 2</label>
+                                <div class="col-sm-10">
+                                    <div class="row row-sm">
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="epsilon" value="10">
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="mu" value="1">
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="length" value="3">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="inputPassword3" class="col-sm-2 form-control-label">Layer 3</label>
+                                <div class="col-sm-10">
+                                    <div class="row row-sm">
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="epsilon" value="5">
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="mu" value="10">
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="length" value="3">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> -->
+                            <div class="form-group row">
+                                <label for="inputPassword3" class="col-sm-2 form-control-label">Ambient Right</label>
+                                <div class="col-sm-10">
+                                    <div class="row row-sm">
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="epsilon" value="1">
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="mu" value="1">
+                                        </div>
+                                        <div class="col-xs-3">
+                                            <input type="text" class="form-control" placeholder="length" value="6">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                        layerNum = parseInt(document.getElementById("numLayers").value) + 1;
+                        </script>
+                        <button  type="button" class='btn white' onclick="refreshStructure()">Build Structures</button>
+                        <!-- <div class="form-group row">
+                            <label for="inputPassword3" class="col-sm-2 form-control-label">zRange</label>
+                            <div class="col-sm-10">
+                                
+                                <div class="row row-sm">
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" placeholder="zRange">
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div> -->
+                        <!--   <div class="form-group row">
+                            <label for="inputPassword3" class="col-sm-2 form-control-label">Omega Range</label>
+                            <div class="col-sm-10">
+                                
+                                <div class="row row-sm">
+                                    <div class="col-xs-5">
+                                        <input type="text" class="form-control" value="0">
+                                    </div>
+                                    <div class="col-xs-5">
+                                        <input type="text" class="form-control" value="5">
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                    </form>
+                </div>
+            </div>
+            <!-- <div class="col-md-12 col-xl-4"> -->
+            <div class="box">
+                <div class="box-header">
+                    <h3>View Structure</h3>
+                    <small>Visual representation of the different layers input above.</small>
+                </div>
+                <div class="box-divider m-a-0"></div>
+                <div class="box-body addHere3" id="structureView">
+                </div>
+            </div>
+        <!-- </div> -->
+        </div>
+
+
+        <div class="col-md-12 col-xl-4">
+            <div class="box">
+                <div class="box-header">
+                    <h3>Input Frequency and Parallel Wave Vector</h3>
+                    <small>Omega, kx, ky. Computes incoming modes</small>
+                    <!-- <small>Omega, kX, kY, z range for dispersion relationship, omega range for transmission. kz array. incoming modes</small> -->
+                </div>
+                <div class="text-center b-t">
+                    <div class="row-col">
+                        <div class="row-cell p-a">
+                            <!-- omega k1 k2 -->
+                            <div class="form-group row">
+                                <label for="inputPassword3" class="col-sm-2 form-control-label">Omega</label>
+                                <div class="col-sm-10">
+                                    <div class="row row-sm">
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control" placeholder="Omega" id="omega" value="1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="inputPassword3" class="col-sm-2 form-control-label">kx</label>
+                                <div class="col-sm-10">
+                                    <div class="row row-sm">
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control" placeholder="k1" id="k1" value="0.2">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="inputPassword3" class="col-sm-2 form-control-label">ky</label>
+                                <div class="col-sm-10">
+                                    <div class="row row-sm">
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control" placeholder="k2" id="k2" value="0.4">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class='btn white' onclick="getIncomingMode()">Compute Modes</button>
+                        </div>
+                        <div class="row-cell p-a dker">
+                            Right and left hand incoming modes
+                            <div id="forwardModes"> </div>
+                            <div id="backwardModes"> </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">
+                    <h3>Define Left and Right Hand Incoming Modes</h3>
+                    <small>Define the strength of the incoming modes and run the experiment.</small>
+                </div>
+                <div class="text-center b-t">
+                    <div class="row-col">
+                        <div class="row-cell p-a">
+                            <!-- omega k1 k2 -->
+                            <div class="form-group row">
+                                <label for="inputPassword3" class="col-sm-2 form-control-label">Incoming Modes Left</label>
+                                <div class="col-sm-10">
+                                    <div class="row row-sm">
+                                        <div class="col-xs-5">
+                                            <input type="text" class="form-control" value="1" id="j1">
+                                        </div>
+                                        <div class="col-xs-5">
+                                            <input type="text" class="form-control" value="0" id="j2">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="inputPassword3" class="col-sm-2 form-control-label">Incoming Modes Right</label>
+                                <div class="col-sm-10">
+                                    <div class="row row-sm">
+                                        <div class="col-xs-5">
+                                            <input type="text" class="form-control" value="1" id="j3">
+                                        </div>
+                                        <div class="col-xs-5">
+                                            <input type="text" class="form-control" value="0" id="j4">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class='btn white' onclick="runExperiment()">Run Experiment</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">
+                    <h3>View Transmission</h3>
+                    <small>Not fully implemented</small>
+                </div>
+                <div class="box-divider m-a-0"></div>
+                <div class="box-body " id="transView">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 col-xl-4">
+            <div class="box">
+                <div class="box-header">
+                    <h3>View Structure and Field</h3>
+                    <small>Individual graph of one part of the field.</small>
+                    <div id="selector" class="btn-group">
+                        <button name="Ex" type="button" class="btn active">Ex</button>
+                        <button name="Ey" type="button2" class="btn">Ey</button>
+                        <button name="Hx" type="button" class="btn">Hx</button>
+                        <button name="Hy" type="button" class="btn">Hy</button>
+                    </div>
+                    <button onclick="setTimeout('printFieldsChart(\'addHere2\', \'fieldsModal\', \'100%\', \'100%\')',500)" class="btn info" data-toggle="modal" data-target="#m-a-a" ui-toggle-class="flip-y" ui-target="#animate">Fullscreen</button>
+                    <div id="m-a-a" class="modal fade animate" data-backdrop="true">
+                        <div class="modal-dialog modal-lg" id="animate">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Fullscreen Field</h5>
+                                </div>
+                                <div id="fieldsModal" class="modal-body addHere2 text-center p-lg">
+                                    <!-- <p>Are you sure to execute this action?</p> -->
+                                </div>
+                                <div class="modal-footer">
+                                    <div id="selector2" class="btn-group">
+                                        <button name="Ex" type="button" class="btn active">Ex</button>
+                                        <button name="Ey" type="button" class="btn">Ey</button>
+                                        <button name="Hx" type="button" class="btn">Hx</button>
+                                        <button name="Hy" type="button" class="btn">Hy</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.modal-content -->
+                        </div>
+                    </div>
+                </div>
+                <div class="box-divider m-a-0"></div>
+                <div class="text-center m-b">
+                    <script type="text/javascript">
+                    $('#selector button').click(function() {
+                        $(this).addClass('active').siblings().removeClass('active');
+
+
+                        $("#shownVal").val(this.name);
+                        console.log("this:" + $("#shownVal").value);
+                        $("#structView").html("");
+                        printFieldsChart("addHere", "structView", "100%", "100%");
+                        // refreshStructure();
+                        // $("#structView").html("");
+                        // TODO: insert whatever you want to do with $(this) here
+                    });
+                    $('#selector2 button').click(function() {
+                        $(this).addClass('active').siblings().removeClass('active');
+
+
+                        $("#shownVal").val(this.name);
+                        console.log("this:" + $("#shownVal").value);
+                        $("#fieldsModal").html("");
+                        printFieldsChart("addHere2", "fieldsModal", "100%", "100%");
+                        // console.log("this:"+$(this).html();
+                        // TODO: insert whatever you want to do with $(this) here
+                    });
+                    </script>
+                    <!--  <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-sm white active">
+                            <input onclick="setFieldView('Ex')" value="Ex" type="radio" name="options" autocomplete="off"> Ex
+                        </label>
+                        <label class="btn btn-sm white">
+                            <input onclick="setFieldView('Ey')" value="Ey" type="radio" name="options" autocomplete="off"> Ey
+                        </label>
+                        <label class="btn btn-sm white">
+                            <input onclick="setFieldView('Hx')" value="Hx" type="radio" name="options" autocomplete="off"> Hx
+                        </label>
+                        <label class="btn btn-sm white">
+                            <input onclick="setFieldView('Hy')" value="Hy" type="radio" name="options" autocomplete="off"> Hy
+                        </label>
+                        <script type="text/javascript">
+                        </script>
+                    </div> -->
+                </div>
+                <div class="box-body addHere" id="structView">
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">
+                    <h3>View 3D Field</h3>
+                    <small>Combined graph of both of the two electric and magnetic parts.</small>
+                    <small>Controls: Left Click+Drag = Rotate; Right Click+Drag = Pan; Scroll/Middle Mouse = Zoom.</small>
+                </div>
+                <div class="box-divider m-a-0"></div>
+                <div class="box-body " id="testcanvas">
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-header">
+                    <h3>View Dispersion</h3>
+                    <small>Not fully implemented</small>
+                </div>
+                <div class="box-divider m-a-0"></div>
+                <div class="box-body " id="dispView">
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    </div>
+    <!-- </div> -->
+
+    <!-- <div class="row">
+        <div class="col-md-12 col-xl-4">
+            <div class="box">
+                <div class="box-header">
+                    <h3>View Transmission</h3>
+                    <small>description</small>
+                </div>
+                <div class="box-divider m-a-0"></div>
+                <div class="box-body " id="transView">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 col-xl-4">
+            <div class="box">
+                <div class="box-header">
+                    <h3>View Dispersion</h3>
+                    <small>description</small>
+                </div>
+                <div class="box-divider m-a-0"></div>
+                <div class="box-body " id="dispView">
+                </div>
+            </div>
+        </div>
+    </div> -->
